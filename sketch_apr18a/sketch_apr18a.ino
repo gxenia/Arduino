@@ -2,28 +2,36 @@
 // Funziona a metà
 
 const int buttonPin = 2;
-const int ledPin = 13;
-int buttonState = 0;
-int ledState = 0;
+const int ledPin = 8;
+int buttonStatePremuto = LOW;
+int ledState = LOW;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   pinMode(buttonPin, INPUT);
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, HIGH);
+  // digitalWrite(ledPin, HIGH);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  buttonState = digitalRead(buttonPin);
-  ledState = digitalRead(ledPin);
-  Serial.println(buttonState);
+  int buttonState = digitalRead(buttonPin);
+  // ledState = digitalRead(ledPin);
+  // Serial.println(buttonState);
 
-  if (buttonState == 1){ 
-    if (ledState == 1) {
-      digitalWrite(ledPin, 0); }
-    else if (ledState == 0) {
-      digitalWrite(ledPin, 1);n}
+  if (buttonState == HIGH && buttonStatePremuto == LOW){
+    Serial.println("Hello");
+    ledState = !ledState;
+    delay(50);
   }
+
+  digitalWrite(ledPin, ledState);
+  buttonStatePremuto = buttonState;
+
+  if (buttonState == HIGH && buttonStatePremuto == HIGH) {
+    delay(500);
+  }
+
+
 }
