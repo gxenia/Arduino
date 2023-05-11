@@ -1,4 +1,5 @@
 // SIMON SAYS - 27/04
+#include <avr/wdt.h>
 
 int n_led = 0;
 const int led1 = 4;
@@ -18,6 +19,14 @@ const int BUZZER_FREQ = 500; // frequenza a cui suona il buzzer !DA MODIFICARE
 
 const int BUTTON_DELAY = 1000; // per evitare possibili doppie letture 
 
+int sequenza[15];
+int seq_len = 0;
+int seq_ind = 0;
+
+bool gameover = false;
+bool buttonPressed = false;
+
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -30,57 +39,100 @@ void setup() {
 }
 
 void loop() {
-  // Scelgo un valore random da 1 a 4
+
+  if (gameover) {
+    if (seq_len < sizeof(sequenza)) {
+      generaSequenza();
+      seq_len ++;
+    }
+    else {
+      Serial.println("You won!");
+      digitalWrite(led1, HIGH);
+      digitalWrite(led2, HIGH);
+      digitalWrite(led3, HIGH);
+      digitalWrite(led4, HIGH);
+    }
+  }
+  else (gameover == true) {
+    Serial.println("You lost!");
+    playDefeatMelody();
+    resetFunc();
+    
+  }
+  
+
+  // Accendo i led in base al valore
+  for (i = 0; i < seq_len; i++) {
+    valore = sequenza[i];
+    Accendi_led(valore);
+  }
+  
+  // Aspetto e controllo ciò che invia l'utente
+  
+
+
+
+}
+
+
+void Accendi_led(int element) {
+    if (element == 1) {
+      Serial.println("red");
+      digitalWrite(led1, HIGH);
+      tone(buzzer, 440, 20);
+      delay(1000);
+      digitalWrite(led1, LOW);
+    }
+
+    else if (element == 2) {
+      Serial.println("yellow");
+      digitalWrite(led2, HIGH);
+      tone(buzzer, 540, 20);
+      delay(1000);
+      digitalWrite(led2, LOW);
+    }
+
+    else if (element == 3) {
+      Serial.println("green");
+      digitalWrite(led3, HIGH);
+      tone(buzzer, 640, 20);
+      delay(1000);
+      digitalWrite(led3, LOW);
+    }
+
+    else if (element == 4) {
+      Serial.println("blue");
+      digitalWrite(led4, HIGH);
+      tone(buzzer, 740, 20);
+      delay(1000);
+      digitalWrite(led4, LOW);
+    }
+}
+
+void generaSequenza() {
   int random = 1 + (rand() % 4);
   Serial.println(random);
+  sequenza[seq_len] = random;
+}
 
-  // Accendo il led in base al valore
-  if (random == 1) {
-    Serial.println("red");
-    digitalWrite(led1, HIGH);
+void playDefeatMelody() {
+  // Melodia di sconfitta
+  int melody[] = {NOTE_C4, NOTE_E3, NOTE_A3, NOTE_G3};
 
-    tone(buzzer, 440);
-    delay(20);
-    noTone(buzzer);
+  // Durata delle note corrispondenti alla melodia
+  int noteDurations[] = {4, 8, 8, 2};
 
-    delay(1000);
-    digitalWrite(led1, LOW);
+  for (int i = 0; i < sizeof(melody) / sizeof(melody[0]); i++) {
+    int noteDuration = 1000 / noteDurations[i];
+    tone(BUZZER_PIN, melody[i], noteDuration);
+    delay(noteDuration);
+    noTone(BUZZER_PIN);
+    delay(50);
   }
 
-  else if (random == 2) {
-    Serial.println("yellow");
-    digitalWrite(led2, HIGH);
+}
 
-    tone(buzzer, 440);
-    delay(20);
-    noTone(buzzer);
-
-    delay(1000);
-    digitalWrite(led2, LOW);
-  }
-
-  else if (random == 3) {
-    Serial.println("green");
-    digitalWrite(led3, HIGH);
-
-    tone(buzzer, 440);
-    delay(20);
-    noTone(buzzer);
-
-    delay(1000);
-    digitalWrite(led3, LOW);
-  }
-
-  else if (random == 4) {
-    Serial.println("blue");
-    digitalWrite(led4, HIGH);
-
-    tone(buzzer, 440);
-    delay(20);
-    noTone(buzzer);
-
-    delay(1000);
-    digitalWrite(led4, LOW);
-  }
-
+void resetFunc() {
+  wdt_enable(WDT_PERIOD_8KCLK_gc); // 8 ms watchdog 
+  while(true); // infinite loop without feeding the dog, should reset in 8ms
 }
