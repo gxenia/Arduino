@@ -47,6 +47,7 @@ void setup() {
   pinMode(b2, INPUT);
   pinMode(b3, INPUT);
   pinMode(b4, INPUT);
+  playStartMelody();
 }
 
 void loop() {
@@ -79,11 +80,12 @@ void loop() {
   for (int i = 0; i < seq_len; i++) {
     buttonPressed = false;
     while (!isButtonPressed()) {;}
+    Accendi_led(pressed[i]);
     if (pressed[i] != sequenza[i]) {
       gameover = true;
       break;
     }
-    delay(1000);
+    delay(500);
   }
 }
 
@@ -160,6 +162,27 @@ bool isButtonPressed() {
   }
 
   return buttonPressed;
+}
+
+void playStartMelody() {
+  // Frequenze delle note musicali in Hz. Si possono trovare altri valori cercando "Frequencies of Musical Notes"
+  int note_C4 = 262;
+  int note_D4 = 294;
+  int note_E4 = 330;
+  int note_G4 = 392;
+
+  // Melodia di avvio (C, D, E, G, E, D, C)
+  int melody[] = {note_C4, note_D4, note_E4, note_G4, note_E4, note_D4, note_C4};
+
+  // Durata delle note in millisecondi (quanto a lungo suona ogni nota)
+  int noteDurations[] = {500, 500, 500, 500, 500, 500, 500};
+
+  // Suona la melodia
+  for (int i = 0; i < sizeof(melody) / sizeof(melody[0]); i++) {
+    tone(buzzer, melody[i], noteDurations[i]);
+    delay(noteDurations[i] + 50); // Aspetta la durata della nota più un piccolo ritardo prima di passare alla prossima nota
+    noTone(buzzer); // Ferma il suono del buzzer
+  }
 }
 
 void playDefeatMelody() {
